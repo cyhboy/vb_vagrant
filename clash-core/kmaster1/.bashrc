@@ -2,6 +2,9 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
+alias proxy="export http_proxy=http://127.0.0.1:7890;export https_proxy=http://127.0.0.1:7890"
+alias unproxy="unset http_proxy;unset https_proxy"
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;

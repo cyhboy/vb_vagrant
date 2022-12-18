@@ -12,13 +12,94 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/focal64"
-  config.vm.hostname = "kmaster1"
+  config.vm.define "km1" do |km1|
+    km1.vm.box = "ubuntu/focal64"
+    km1.vm.box_version = "20221202.0.0"
+    # $vb_name="km1"
+
+    km1.vm.hostname = "kmaster1"
+    km1.vm.network "public_network", ip: "192.168.1.111", bridge: "Intel(R) Centrino(R) Advanced-N 6205"
+
+    km1.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      # vb.gui = true
+      
+      vb.name = "kmaster1"
+  
+      # Customize the amount of memory on the VM:
+      vb.memory = "4096"
+      vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
+    end
+  end
+
+
+  config.vm.define "kn1" do |kn1|
+    kn1.vm.box = "ubuntu/focal64"
+    kn1.vm.box_version = "20221202.0.0"
+    
+    kn1.vm.hostname = "knode1"
+    kn1.vm.network "public_network", ip: "192.168.1.112", bridge: "Intel(R) Centrino(R) Advanced-N 6205"
+
+    kn1.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      # vb.gui = true
+      
+      vb.name = "knode1"
+  
+      # Customize the amount of memory on the VM:
+      vb.memory = "4096"
+      vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
+    end
+  end
+
+
+  config.vm.define "kn2" do |kn2|
+    kn2.vm.box = "ubuntu/focal64"
+    kn2.vm.box_version = "20221202.0.0"
+
+    kn2.vm.hostname = "knode2"
+    kn2.vm.network "public_network", ip: "192.168.1.113", bridge: "Intel(R) Centrino(R) Advanced-N 6205"
+
+    kn2.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      # vb.gui = true
+      
+      vb.name = "knode2"
+  
+      # Customize the amount of memory on the VM:
+      vb.memory = "4096"
+      vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
+    end
+  end
+
+
+  config.vm.provision "shell", inline: <<-SHELL
+    # apt update
+    # apt install libxt6 libxmu6
+    # apt install -y net-tools
+
+    # cp /vagrant/clash-core/clash.service /etc/systemd/system
+    # systemctl daemon-reload
+    # systemctl start clash
+    # systemctl enable clash
+
+    # cp /home/vagrant/.bashrc /vagrant/clash-core/`hostname`
+    # cp /vagrant/clash-core/`hostname`/.bashrc /vagrant/clash-core/`hostname`/.bashrc.bak
+    sed -i '0,/^$/s/^$/\nalias proxy=\"export http_proxy=http:\/\/127.0.0.1:7890;export https_proxy=http:\/\/127.0.0.1:7890\"\nalias unproxy=\"unset http_proxy;unset https_proxy\"\n/g' /vagrant/clash-core/`hostname`/.bashrc
+    cp /vagrant/clash-core/`hostname`/.bashrc /home/vagrant
+
+    # cp /vagrant/clash-core/`hostname`/.bashrc.bak /home/vagrant
+
+    # mkdir -p /vagrant/clash-core/`hostname`
+    ## source /home/vagrant/.bashrc
+  SHELL
+
+
   # config.vm.synced_folder ".", "/vagrant"
   
   # config.vm.network "private_network", ip: "192.168.2.111"
 
-  config.vm.network "public_network", ip: "192.168.1.111", bridge: "Intel(R) Centrino(R) Advanced-N 6205"
+
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -55,29 +136,7 @@ Vagrant.configure("2") do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
 
-  config.vm.provider "virtualbox" do |vb|
-    # Display the VirtualBox GUI when booting the machine
-    # vb.gui = true
-    
-    vb.name = "kmaster1"
 
-    # Customize the amount of memory on the VM:
-    vb.memory = "4096"
-    vb.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
-  end
-
-  config.vm.provision "shell", inline: <<-SHELL
-    # cp /vagrant/clash-core/clash.service /etc/systemd/system
-    # systemctl daemon-reload
-    # systemctl start clash
-    # systemctl enable clash
-    # cp /home/vagrant/.bashrc /vagrant/clash-core
-    # cp /vagrant/clash-core/.bashrc /vagrant/clash-core/.bashrc.bak
-    # sed -i '0,/^$/s/^$/\nalias proxy=\"export http_proxy=http:\/\/127.0.0.1:7890;export https_proxy=http:\/\/127.0.0.1:7890\"\nalias unproxy=\"unset http_proxy;unset https_proxy\"\n/g' /vagrant/clash-core/.bashrc
-    # cp /vagrant/clash-core/.bashrc /home/vagrant
-
-    ## source /home/vagrant/.bashrc
-  SHELL
 
   # View the documentation for the provider you are using for more
   # information on available options.
